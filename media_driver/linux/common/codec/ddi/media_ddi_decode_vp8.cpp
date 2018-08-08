@@ -88,9 +88,6 @@ VAStatus DdiDecodeVP8::ParseSliceParams(
 
     memcpy_s(picParams->uiPartitionSize, sizeof(picParams->uiPartitionSize), slcParam->partition_size, sizeof(picParams->uiPartitionSize));
 
-    //partition 0 size in command buffer includes the one byte in bool decoder if remaining bits of bool decoder is not zero.
-    picParams->uiPartitionSize[0] += (slcParam->macroblock_offset & 0x7) ? 1 : 0;
-
     return VA_STATUS_SUCCESS;
 }
 
