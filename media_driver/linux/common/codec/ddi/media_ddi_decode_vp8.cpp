@@ -88,6 +88,9 @@ VAStatus DdiDecodeVP8::ParseSliceParams(
 
     memcpy_s(picParams->uiPartitionSize, sizeof(picParams->uiPartitionSize), slcParam->partition_size, sizeof(picParams->uiPartitionSize));
 
+    //partition 0 size in command buffer includes the one byte in bool decoder if remaining bits of bool decoder is zero.
+    picParams->uiPartitionSize[0] -= (slcParam->macroblock_offset & 0x7) ? 0 : 1;
+
     return VA_STATUS_SUCCESS;
 }
 
@@ -232,6 +235,8 @@ VAStatus DdiDecodeVP8::ParsePicParams(
             picParam->mv_probs[1],
             sizeof(codecPicParams->ucMvUpdateProb[1]));
     }
+    // Note that va says that count is a number of remained bits in value,
+    // but in fact when count is 0 it does need next byte in value. Rely on that.
     codecPicParams->ucP0EntropyCount = (8 - picParam->bool_coder_ctx.count) & 0x7;  //hardware needs used bits not remaining bits in bool decoder
     codecPicParams->ucP0EntropyValue = picParam->bool_coder_ctx.value;
     codecPicParams->uiP0EntropyRange = picParam->bool_coder_ctx.range;
